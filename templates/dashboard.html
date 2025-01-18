@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{%block title%} 
+            Home page 
+{%endblock%}
+
+
+{%block body %}                           
+<div class="container">
+    <div class="row">
+        <div class="col md-12">
+            <div class="jumbotron p-3 bg-light">
+                <h2>  Manage Queue <button type="button" class="btn btn-success float-end" onclick="addpatient()">Add New Patient</button></h2>
+                {%with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    {%for message in messages %}
+                      <div class="alert alert-success alert-dismissable" role="alert">
+                          <button type="button" close="Close float-end" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">X</span>  
+                          </button>
+                          {{message}}
+                      </div>
+                    {%endfor%}
+                  {% endif %}
+                {% endwith %}
+                <table class="table table-hover table-dark">
+                    <tr>
+                        <th>SN</th>
+                        <th>Patient ID</th>
+                        <th>Procedure</th>
+                        <th>Queue Time</th>
+                        <th colspan="3" align="center">Action</th>
+                    </tr>
+                    {% for row in system_queue %}
+                    {% if loop.index >0 %}
+                    <tr>
+                        <td class="counter"></td>
+                        <td>{{row.pat_id}}</td>
+                        <td>{{row.pat_procedure}}</td>
+                        <td>{{row.queue_time}}<input type="hidden" class="form-control" id="queue_id" name="queue_id" value="{{row.queue_id}}"></td>
+                        <td> <a href="#" class="btn btn-success" data-toggle="modal" data-target="#mymodal" onclick="patientserved('{{ row.queue_id }}')"> Served</a></td>
+                        <td> <a href="/update/{{row.queue_id}}" class="btn btn-warning" data-toggle="modal" data-target="#modaledit{{row.queue_id}}"> Edit</a></td>
+                       <td> <a href="/delete/{{row.queue_id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are you sure, you want to Delete?')"> Delete</a></td>
+                     </tr>
+                     
+                    <!-- Edit Data Modal comes in here-->
+                    <div class="modal fade" id="modaledit{{row.queue_id}}" name="modaledit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" >
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">Edit Patient Record</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <form action="/update" method="POST">
+                                <div class="form-group">
+                                  <label for="recipient-name" class="col-form-label" required="1">Patient ID:</label>
+                                  <input type="hidden" class="form-control" id="queue_id" name="queue_id" value="{{row.queue_id}}">
+                                  <input type="text" class="form-control" id="patient_id" name="patient_id" value="{{row.pat_id}}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="patient-phone" class="col-form-label">Phone Number:</label>
+                                    <input type="text" class="form-control" id="patient_phone" name="patient_phone" value="{{row.pat_phone}}">
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="procedure_procedure" class="col-form-label">Select Procedure:</label></br>
+                                    <select name="Patient_procedure" id="Patient_procedure" class="custom-select" >
+                                        <option value="{{row.pat_procedure}}">{{row.pat_procedure}}</option>
+                                        <option value="CT">CT</option>
+                                        <option value="MRI">MRI</option>
+                                        <option value="X-Ray">X-Ray</option>
+                                    </select>
+
+                                </div>
+                                <div class="form-group">
+                                  <label for="procedure_duration" class="col-form-label">Procedure Duration:</label>
+                                  <input type="text" value="{{row.queue_time}}" class="form-control" id="queue_time" name="queue_time" placeholder="Procedure Duration in minutes">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-primary" type="submit">Update Record</button>
+                                </div>
+                              </form>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    <!-- Edit Data Modal Ends here-->
+
+                     
+
+                    <!-- Data Modal End here-->
+                     {%endif%}
+                    {%endfor%}
+                </table>
+                <!--- Add Patient Modal come in here-->
+
+<!-- Add Patient Modal -->
+<div class="modal fade" id="addpatient" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add New Patient Record</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <form action="/insert" method="POST">
+                  <div class="form-group">
+                      <label for="patient_id" class="col-form-label">Patient ID:</label>
+                      <input type="text" class="form-control" id="patient_id" name="patient_id">
+                  </div>
+                  <div class="form-group">
+                      <label for="patient_phone" class="col-form-label">Phone Number:</label>
+                      <input type="text" class="form-control" id="patient_phone" name="patient_phone">
+                  </div>
+                  <div class="form-group">
+                      <label for="patient_procedure" class="col-form-label">Select Procedure:</label>
+                      <select name="patient_procedure" id="patient_procedure" class="custom-select">
+                          <option value="">--Please choose an option--</option>
+                          <option value="CT">CT</option>
+                          <option value="MRI">MRI</option>
+                          <option value="X-Ray">X-Ray</option>
+                      </select>
+                  </div>
+                  <div class="form-group">
+                      <label for="queue_time" class="col-form-label">Procedure Duration:</label>
+                      <input type="text" class="form-control" id="queue_time" name="queue_time" placeholder="Procedure Duration in minutes">
+                  </div>
+                  <div class="form-group">
+                      <button class="btn btn-primary" type="submit">Add To Queue</button>
+                  </div>
+              </form>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+  <div class="text-center">
+      <h2>Custom Queue Monitor</h2>
+      <div class="btn-group mt-4" role="group" aria-label="Button group">
+          <button type="button" class="btn btn-primary" onclick="window.location.href='/xrayview'">X-Ray Queue</button>
+          <button type="button" class="btn btn-danger" onclick="window.location.href='/ctview'">CT-Queue</button>
+          <button type="button" class="btn btn-success" onclick="window.location.href='/mriview'">MRI-Queue</button>
+          <button type="button" class="btn btn-info" onclick="window.location.href='/genreport'">Queue Report</button>
+      </div>
+  </div>
+</div>
+</div>
+<script>
+    function confirmDelete() {
+        if (confirm('Are You Sure You Yant to Delete?')) {
+            // Open the modal
+           // alert("Am here")
+            $('#modaledit').modal('show');
+        }
+    }
+
+    // Ensure focus is triggered when modal is shown
+    $('#modaledit').on('shown.bs.modal', function () {
+        $('#myInput').trigger('focus');
+    });
+    function modaledit() {
+            // Open the modal
+            $('#modaledit').modal('show');
+    }
+    function addpatient() {
+            // Open the modal
+            $('#addpatient').modal('show');
+    }
+///////////////////////////////////////////////////////////
+// ////Functions to take care of served patients///////////
+///////////////////////////////////////////////////////////
+function patientserved(queue_id) {
+  fetch('/update_status', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: 'served',
+                            queue_id: queue_id 
+                          })
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.success) {
+          alert('Status updated successfully!');
+          location.reload(); // This will refresh the entire page
+      } else {
+          alert('Failed to update status.');
+      }
+  })
+  .catch(error => console.error('Error:', error));
+}
+document.addEventListener('DOMContentLoaded', function() {
+        let counters = document.querySelectorAll('.counter');
+        counters.forEach((counter, sn_index) => {
+            counter.textContent = sn_index + 1; // Incrementing index starts from 0, so add 1
+        });
+    });
+</script>
+{%endblock%}             

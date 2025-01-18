@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %} X-Queue List {% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="vw-100 bg-info">
+            <div class="jumbotron p-3 bg-info text-white">
+                <h2 align="center">CT Radiology Department</h2>
+            </div>
+            <table class="table table-hover table-dark"  style="border: 6px solid white;">
+            
+                {% if ct_data %}
+                    <tr>
+                        <td>Patient ID</td>
+                        <td>Procedure Estimated Time</td>
+                        <td>NEXT ON QUEUE</td>
+                    </tr>
+
+                    <tr>
+                        <td><span style="font-size: 34px; color:aquamarine;">{{ ct_data[0].pat_id }}</span></td>
+                        <td>
+                            <p><span id="countdown" style="font-size: 104px; color: red;"></span></p>
+                            <script>
+                                // Countdown logic
+                                let queueTime = {{ ct_data[0].queue_time }};
+                                let countdownInSeconds = queueTime * 60;
+                                let countdownInterval;
+                        
+                                // Function to start the countdown
+                                function startCountdown() {
+                                    let countdownElement = document.getElementById("countdown");
+                                    countdownInterval = setInterval(function () {
+                                        let minutes = Math.floor(countdownInSeconds / 60);
+                                        let seconds = countdownInSeconds % 60;
+                                        countdownElement.innerHTML = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                        
+                                        // Stop countdown and show "TIME-UP" if it reaches zero
+                                        if (countdownInSeconds <= 0) {
+                                            clearInterval(countdownInterval);
+                                            countdownElement.innerHTML = "TIME-UP";
+                                        }
+                                        countdownInSeconds--;
+                                    }, 1000);
+                                }
+                        
+                                // Function to handle emergency
+                                function emmergency() {
+                                    // Stop the countdown
+                                    clearInterval(countdownInterval);
+                                    // Display emergency message
+                                    let countdownElement = document.getElementById("countdown");
+                                    countdownElement.innerHTML = "Emergency! Kindly Hold";
+                                }
+                        
+                                // Function to update patient status
+                                function patientserved(queue_id) {
+                                    fetch('/update_status', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ status: 'served', queue_id: queue_id })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            alert('Status updated successfully!');
+                                            location.reload();
+                                        } else {
+                                            alert('Failed to update status.');
+                                        }
+                                    })
+                                    .catch(error => console.error('Error:', error));
+                                }
+                        
+                                // Initialize countdown on page load
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    startCountdown();
+                                });
+                            </script>
+                            <a href="#" class="btn btn-info" > Now serving... </a>
+                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#mymodal" onclick="patientserved('{{ct_data[0].queue_id}}')"> Served</a>
+                            <a href="#" onclick="emmergency()"> <img src="{{ url_for('static', filename='emergency.png') }}" alt="Emme" style="width: 20px; height: 20px; margin-left: 5px;">
+                            </a>
+                        </td>
+                        <td>
+                            <table class="table table-stripe table-dark" >
+                                <tr>
+                                    <td> <span style="font-size: 18px; color:rgb(255, 127, 202); font-weight: bold;">Pat ID</span></td>
+                                    <td><span style="font-size: 18px; color:rgb(255, 127, 202); font-weight: bold;">Procedure Estimated Time</span></td>
+                                </tr>
+                                {% for record in ct_data[1:] %}
+                                    <tr>
+                                        <td>{{ record.pat_id }}</td>
+                                        <td>{{ record.queue_time }}
+                                            <img src="{{ url_for('static', filename='clock.png') }}" alt="Clock" style="width: 20px; height: 20px; margin-left: 5px;">
+         
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                    </tr>
+                
+                {% else %}
+                <tr>
+                    <td colspan="3">No records found.</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

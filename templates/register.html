@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{%block title%} 
+            Home page
+{%endblock%}
+
+
+{%block body %}
+<div class="container">
+    <div class="row">
+        <div class="col md-12">
+            <div class="jumbotron p-3 bg-light">
+                
+                    <div class="hmcontainer">
+                        <div class="left col md-6">
+                            <form class="login-form" method="post" action="{{url_for('signup')}}" id="register">
+                                <h2>Registration</h2>
+                                <input type="text" placeholder="Username" required name="username" id="username"><br/>
+                                <input type="password" placeholder="Password" required name="userpass" id="userpass">
+                                <input type="text" placeholder="First Name" required name="firstname" id="firstname"><br/>
+                                <input type="text" placeholder="Last Name" required name="lastname" id="lastname"><br/>
+                                <select data-mdb-select-init id="dept" name="dept">
+                                    <option value="0">    --Department--   </option>
+                                    <option value="1"> ICT</option>
+                                    <option value="2"> RAD</option>
+                                </select>
+                                <br/>
+                                <br/>
+                                <button type="submit">Sign Up</button>
+                            </form>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>       
+<table class="table table-hover table-dark"></table>
+
+{%endblock%}
+                

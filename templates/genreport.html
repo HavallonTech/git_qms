@@ -1,0 +1,123 @@
+
+{% extends 'base.html' %}
+
+{% block title %} CT-Queue List {% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+<div class="container">
+    <div class="row">
+        <div class="vw-100 bg-info">
+            <div class="jumbotron p-3 bg-info text-white">
+                <h2 align="center">General Queue Report</h2>
+            </div>
+            
+            <div class="container bg-light">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <input type="text" id="From" name="From" class="form-control" placeholder="From">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" id="to" name="to" class="form-control" placeholder="To">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="Patient_procedure" id="Patient_procedure" class="custom-select" >
+                            <option value="1">--All Procedure--</option>
+                            <option value="CT">CT</option>
+                            <option value="MRI">MRI</option>
+                            <option value="X-Ray">X-Ray</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="button" class="btn btn-success" id="range" name="range" value="Range"/>
+                    </div>
+                    
+                    </br>
+                    <br/>
+                </div>
+            </div>
+            
+            <div id="report_order"> 
+                <table class="table table-bordered">
+                    <th>
+                        SN
+                    </th>
+                    <th>Patient ID</th>
+                    <th>Phone number</th>
+                    <th>Service</th>
+                    <th>Time Arrived</th>
+                    <th>Time Departed</th>
+                    <th>Services Status</th>
+                    {% if report_data %}
+                    <tr>
+                        <td class="counter"></td>
+                        <td>{{report_data[1].pat_id}}</td>
+                        <td>{{report_data[1].pat_phone}}</td>
+                        <td>{{report_data[1].pat_procedure}}</td>
+                        <td>{{report_data[1].arrival_time}}</td>
+                        <td>{{report_data[1].departure_time}}</td>
+                        <td>
+                            {% if report_data[1].service_status == 1 %}
+                              unserved
+                            {% elif report_data[1].service_status == 2 %}
+                              served
+                            {% else %}
+                              unknown
+                            {% endif %}
+                          </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" align="center" >No Record To Display...</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let counters = document.querySelectorAll('.counter');
+        counters.forEach((counter, sn_index) => {
+            counter.textContent = sn_index + 1; // Incrementing index starts from 0, so add 1
+        });
+    });
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////Date Picker Script/////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    $(document).ready(function(){
+    $.datepicker.setDefaults({
+        dateFormat: 'yy-mm-dd'
+    });
+    $(function(){
+        $("#From").datepicker();
+        $("#to").datepicker();
+    });
+    $('#range').click(function(){
+        var From = $('#From').val();
+        var to = $('#to').val();
+        if(From != '' && to != '')
+        {
+            $.ajax({
+                url:"/range",
+                method:"POST",
+                data:{From:From, to:to},
+                success:function(data)
+                {
+                   $('#report_order').html(data);
+                   $('#report_order').append(data.htmlresponse);
+                }
+               
+            });
+        }
+        else
+        {
+            alert("Please Select the Report Date Range ");
+        }
+    });
+});
+</script>
+
+{% endblock %}

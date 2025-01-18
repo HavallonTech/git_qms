@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{%block title%} 
+            Home page
+{%endblock%}
+
+
+{%block body %}
+<div class="container">
+    <div class="row">
+        <div class="col md-12">
+            <div class="jumbotron p-3 bg-light">
+                
+                    <div class="hmcontainer">
+                        <div class="left col md-6">
+                            <form class="login-form" method="post" action="{{url_for('login')}}" id="auth-login">
+                                <h2>Login</h2>
+                                <input type="text" placeholder="Username" required name="username" id="username"><br/>
+                                <input type="password" placeholder="Password" required name="userpass" id="userpass">
+                                <button type="submit">Login</button>
+                                <a href="{{ url_for('register') }}" id="register-link">Register</a>
+                            </form>
+                           
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>       
+<table class="table table-hover table-dark"></table>
+
+{%endblock%}
+                

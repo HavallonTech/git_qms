@@ -1,0 +1,44 @@
+<table class="table table-bordered">
+    <th>
+        SN
+    </th>
+    <th>Patient ID</th>
+    <th>Phone number</th>
+    <th>Service</th>
+    <th>Time Arrived</th>
+    <th>Time Departed</th>
+    <th>Services Status</th>
+    {% if ordersrange %}
+        {% for row in ordersrange %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ row['pat_id'] }}</td>
+                <td>{{ row['pat_phone'] }}</td>
+                <td>{{ row['pat_procedure'] }}</td>
+                <td>{{ row['arrival_time'] }}</td>
+                <td>{{ row['departure_time'] }}</td>
+                <td>
+                    {% if row['service_status'] == 1 %}
+                      unserved
+                    {% elif row['service_status'] == 2 %}
+                      served
+                    {% else %}
+                      unknown
+                    {% endif %}
+                  </td>
+            </tr>
+        {% endfor %}
+    {% else %}
+            <tr>
+                <td colspan="7">No Record Found</td>
+            </tr>
+    {%endif%}
+    </table>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+        let counters = document.querySelectorAll('.counter');
+        counters.forEach((counter, sn_index) => {
+            counter.textContent = sn_index + 1; // Incrementing index starts from 0, so add 1
+        });
+    });
+</script>
